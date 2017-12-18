@@ -9,6 +9,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
+ * The locker client starter.
+ *
  * @author Marco Cipriani
  * @version 0.1
  */
