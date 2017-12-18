@@ -2,6 +2,7 @@ package locker.client;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
 
 /**
  * Shows a window and makes it behave as a lock screen.
@@ -11,13 +12,17 @@ import java.awt.*;
  * @version 0.1
  * @see <a href="https://stackoverflow.com/a/6744937">Use Java to lock a screen</a>
  */
-@SuppressWarnings("unused")
-public class LockScreenRunnable implements Runnable {
+@SuppressWarnings({"unused", "WeakerAccess"})
+public class LockScreenRunner implements Runnable {
 
     /**
      * The frame.
      */
     private JFrame frame;
+    /**
+     * The graphics device of the frame.
+     */
+    private GraphicsDevice gp;
     /**
      * Change it to {@code false} to stop the program.
      */
@@ -26,8 +31,10 @@ public class LockScreenRunnable implements Runnable {
     /**
      * Class constructor. Runs the window.
      */
-    public LockScreenRunnable(JFrame frame) {
+    public LockScreenRunner(JFrame frame, GraphicsDevice gp) {
         this.frame = frame;
+        this.gp = gp;
+        running = true;
         new Thread(this).start();
     }
 
@@ -36,6 +43,7 @@ public class LockScreenRunnable implements Runnable {
      */
     public void stop() {
         this.running = false;
+        frame.dispose();
     }
 
     /**
@@ -43,13 +51,22 @@ public class LockScreenRunnable implements Runnable {
      */
     public void run() {
         try {
-            //this.terminal.getParentFrame().setAlwaysOnTop(true);
-            //this.terminal.getParentFrame().setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
             frame.setAlwaysOnTop(true);
             frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+            boolean fullScreenSupported = gp.isFullScreenSupported();
+            frame.setUndecorated(fullScreenSupported);
+            frame.setResizable(!fullScreenSupported);
+            if (fullScreenSupported) {
+                gp.setFullScreenWindow(frame);
+                frame.validate();
+
+            } else {
+                frame.pack();
+                frame.setVisible(true);
+            }
 
             // Kill explorer
-            kill("explorer.exe");
+            OSTools.killWin("explorer.exe");
 
             Robot robot = new Robot();
             int i = 0;
@@ -59,15 +76,16 @@ public class LockScreenRunnable implements Runnable {
                 releaseKeys(robot);
                 sleep(15L);
                 focus();
-                if (i++ % 10 == 0) {
-                    kill("taskmgr.exe");
-                }
+                //if (i++ % 10 == 0) {
+                //    kill("taskmgr.exe");
+                //}
+                OSTools.killWin("taskmgr.exe");
                 focus();
                 releaseKeys(robot);
             }
 
             // Restart explorer
-            Runtime.getRuntime().exec("explorer.exe");
+            OSTools.execWin("explorer.exe");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -76,11 +94,11 @@ public class LockScreenRunnable implements Runnable {
 
     // TODO(marco): add JavaDoc
     private void releaseKeys(Robot robot) {
-        robot.keyRelease(17);
-        robot.keyRelease(18);
-        robot.keyRelease(127);
-        robot.keyRelease(524);
-        robot.keyRelease(9);
+        robot.keyRelease(KeyEvent.VK_CONTROL);
+        robot.keyRelease(KeyEvent.VK_ALT);
+        robot.keyRelease(KeyEvent.VK_DELETE);
+        robot.keyRelease(KeyEvent.VK_WINDOWS);
+        robot.keyRelease(9); //TODO(marco): ?
     }
 
     /**
@@ -93,20 +111,6 @@ public class LockScreenRunnable implements Runnable {
         try {
             Thread.sleep(millis);
 
-        } catch (Exception ignored) {
-
-        }
-    }
-
-    /**
-     * Kills the specified process.
-     *
-     * @param processName the name of the process to kill.
-     */
-    private void kill(String processName) {
-        try {
-            Runtime.getRuntime().exec("taskkill /F /IM " + processName).waitFor();
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -116,8 +120,7 @@ public class LockScreenRunnable implements Runnable {
      * Grabs the focus.
      */
     private void focus() {
-        //this.frame.grabFocus();
         frame.toFront();
-        frame.requestFocus();
+        //frame.requestFocus();
     }
 }
