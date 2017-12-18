@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.ArrayList;
 
 /**
  * Server Socket for a local LAN server with event handling.
@@ -12,78 +14,86 @@ import java.net.ServerSocket;
  * @author Marco Cipriani
  * @version 0.1
  */
-@SuppressWarnings({"unused", "unchecked"})
+@SuppressWarnings({"unused", "unchecked", "WeakerAccess"})
 public abstract class Server extends StringNetPort {
 
     /**
      * Server socket.
      */
     private ServerSocket serverSocket;
+    /**
+     * List of client sockets.
+     */
+    private ArrayList<Socket> clients = new ArrayList<>();
 
     /**
-     * Class constructor. Initializes the server without trying a connection.
+     * Class constructor. Initializes the client without attempting a connection.
      *
      * @param mode the mode. See {@link NetPort.Mode}
-     * @param port the port of your server.
+     * @param port the port of the new server.
      */
     public Server(Mode mode, int port) {
         super(mode, port);
     }
 
     /**
+     * Class constructor. Initializes the client without attempting a connection.
+     *
+     * @param port the port of the new server.
+     */
+    public Server(int port) {
+        super(port);
+    }
+
+    /**
      * Starts the socket and the connection.
      */
     @Override
-    public boolean connect() {
-        Runnable conn = () -> {
-            try {
-                connected = false;
-                serverSocket = new ServerSocket(p);
-                socket = serverSocket.accept();
-                out = new PrintWriter(socket.getOutputStream(), true);
-                in = new BufferedReader(
-                        new InputStreamReader(socket.getInputStream()));
+    public void connect0() throws IOException {
+        serverSocket = new ServerSocket(port);
 
-                connected = true;
+        new Thread(() -> {
+            while (true) {
+                try {
+                    Socket socket = serverSocket.accept();
+                    clients.add(socket);
+                    PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                    BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                    new Thread(() -> read(in), "Reading thread").start();
 
-            } catch (Exception e) {
-                System.err.println("An error occurred during connection.");
-                e.printStackTrace();
-                connected = false;
+                } catch (IOException e) {
+                    System.err.println("An error occurred during connection.");
+                    e.printStackTrace();
+                }
             }
-        };
-        if (m == Mode.TYPE_JAVA_MAIN_THREAD) {
-            conn.run();
 
-        } else {
-            Thread connThread = new Thread(conn, "Server connection");
-            connThread.start();
-            try {
-                connThread.join();
+        }, "Server connection thread").start();
+    }
 
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        new Thread(new ReadRunnable(), "Server read thread").start();
-
-        return connected;
+    /**
+     * Sends a message to the client.
+     *
+     * @param msg the message to send.
+     */
+    @Override
+    public void send(String msg) {
+        throw new UnsupportedOperationException(":-(");
     }
 
     /**
      * Closes the connection.
-     *
-     * @throws IllegalStateException if this server is not connected.
-     * @throws IOException           if an I/O error occurs when closing this socket.
      */
-    public void close() throws IOException {
-        super.close();
+    @Override
+    public void close0() throws IOException {
         serverSocket.close();
+        for (Socket s : clients) {
+            s.close();
+        }
     }
 
     /**
      * Invoked when a new message arrives from the client.
      */
+    @Override
     public abstract void onMessage(final String msg);
 }

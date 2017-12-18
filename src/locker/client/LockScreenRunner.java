@@ -39,10 +39,10 @@ public class LockScreenRunner implements Runnable {
     }
 
     /**
-     * Stops the program.
+     * Stops the lock screen and disposes it.
      */
     public void stop() {
-        this.running = false;
+        running = false;
         frame.dispose();
     }
 

@@ -6,6 +6,7 @@ package locker.netlib;
  * @version 0.1
  */
 @SuppressWarnings("unused")
+@Deprecated
 public interface WithListeners<C extends MessageListener> {
 
     /**

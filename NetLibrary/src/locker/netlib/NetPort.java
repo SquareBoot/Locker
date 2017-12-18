@@ -1,41 +1,22 @@
 package locker.netlib;
 
-import locker.netlib.MessageListener;
-import locker.netlib.WithListeners;
-
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.net.Socket;
-import java.util.ArrayList;
 
 /**
  * Network client or server base class.
  *
- * @param <I>           the input stream class you want to use.
- * @param <O>           the output stream class you want to use.
  * @param <MessageType> the message type.
  * @author Marco Cipriani
- * @see MessageListener
+ * @see StringNetPort
  */
-@SuppressWarnings({"unused", "unchecked"})
-public abstract class NetPort<I, O, MessageType>
-        implements WithListeners<MessageListener<MessageType>> {
+@SuppressWarnings({"unused", "unchecked", "WeakerAccess"})
+public abstract class NetPort<MessageType> {
 
-    /**
-     * In.
-     */
-    public I in;
-    /**
-     * Out.
-     */
-    public O out;
-    /**
-     * Client socket.
-     */
-    protected Socket socket;
     /**
      * Port.
      */
-    protected int p;
+    protected int port;
     /**
      * Connection state / connection result.
      */
@@ -44,21 +25,26 @@ public abstract class NetPort<I, O, MessageType>
      * Mode.
      */
     protected Mode m;
-    /**
-     * List of registered listeners.
-     */
-    protected ArrayList<MessageListener<MessageType>> listeners = new ArrayList<>();
 
     /**
-     * Class constructor.
+     * Class constructor. Initializes the port without attempting a connection.
      *
      * @param mode the connection mode.
      * @param port the port.
-     * @see Mode
      */
     public NetPort(Mode mode, int port) {
-        p = port;
+        this.port = port;
         m = mode;
+    }
+
+    /**
+     * Class constructor. Initializes the port without attempting a connection.
+     *
+     * @param port the port.
+     */
+    public NetPort(int port) {
+        this.port = port;
+        m = Mode.MAIN_THREAD;
     }
 
     /**
@@ -66,18 +52,40 @@ public abstract class NetPort<I, O, MessageType>
      *
      * @return {@code true} if the connection was done successfully.
      */
-    public abstract boolean connect();
+    public boolean connect() {
+        Runnable conn = () -> {
+            try {
+                if (connected) {
+                    throw new IllegalStateException("Already connected!");
+                }
+                connect0();
+                connected = true;
+
+            } catch (Exception e) {
+                System.err.println("An error occurred while connecting...");
+                e.printStackTrace();
+            }
+        };
+        if (m == Mode.MAIN_THREAD) {
+            conn.run();
+
+        } else {
+            Thread thread = new Thread(conn, "Connection thread");
+            thread.start();
+            try {
+                thread.join();
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        return connected;
+    }
 
     /**
-     * Invoke this method when you want to notify a lister.
-     *
-     * @param msg the received message.
+     * Starts the connection to the client / server.
      */
-    protected void notifyListeners(final MessageType msg) {
-        for (MessageListener l : listeners) {
-            l.onMessage(msg);
-        }
-    }
+    protected abstract void connect0() throws IOException;
 
     /**
      * Sends a message to the client / server.
@@ -87,34 +95,46 @@ public abstract class NetPort<I, O, MessageType>
     public abstract void send(MessageType msg);
 
     /**
-     * Adds a new listener to the list.
-     *
-     * @param l the new listener.
+     * Invoked when a new message arrives from the server / client.
      */
-    @Override
-    public void addListener(MessageListener l) {
-        listeners.add(l);
-    }
+    protected abstract void onMessage(final MessageType msg);
+
+    /**
+     * Invoke it to start reading.
+     */
+    protected abstract void read(BufferedReader in);
 
     /**
      * @return the current TCP port.
      */
     public int getPort() {
-        return p;
+        return port;
     }
 
     /**
      * Closes the connection.
      *
-     * @throws IllegalStateException if this server is not connected.
-     * @throws IOException           if an I/O error occurs when closing this socket.
+     * @return {@code true} if everything worked fine and the disconnection was successfully.
      */
-    public void close() throws IOException {
+    public boolean close() {
         if (!connected) {
-            throw new IllegalStateException("This server is already closed!");
+            throw new IllegalStateException("This port has already been closed!");
         }
-        socket.close();
+        try {
+            close0();
+            connected = false;
+
+        } catch (IOException e) {
+            System.err.println("Could not disconnect!");
+            e.printStackTrace();
+        }
+        return !connected;
     }
+
+    /**
+     * Closes the connection.
+     */
+    public abstract void close0() throws IOException;
 
     /**
      * Returns the connection state of the current client.
@@ -126,18 +146,19 @@ public abstract class NetPort<I, O, MessageType>
     }
 
     /**
-     * Different ways to do the connection.
+     * Different ways to start the connection.
      *
-     * @author SquareBoot
+     * @author Marco Cipriani
+     * @version 0.1
      */
     public enum Mode {
         /**
          * Type Java: all the client / server code is executed on the main thread.
          */
-        TYPE_JAVA_MAIN_THREAD,
+        MAIN_THREAD,
         /**
          * Type Android: all the client / server code is executed in another thread.
          */
-        TYPE_ANDROID_NO_MAIN_THREAD
+        ANDROID_NO_MAIN_THREAD
     }
 }

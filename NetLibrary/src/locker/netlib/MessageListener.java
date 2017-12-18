@@ -7,6 +7,7 @@ package locker.netlib;
  * @author Marco Cipriani
  * @version 0.1
  */
+@Deprecated
 public interface MessageListener<MessageType> {
 
     /**

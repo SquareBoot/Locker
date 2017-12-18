@@ -6,6 +6,10 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 
+/**
+ * @author Marco Cipriani
+ * @version 0.1
+ */
 @Deprecated
 public class GetIP {
 
