@@ -10,45 +10,98 @@ import java.util.ArrayList;
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class ComputersListModel extends AbstractTableModel {
 
-    private String[] columnNames = {"Name", "PC name", "Login @"};
+    /**
+     * The header of the table.
+     */
+    public static final String[] COLUMN_NAMES = {"Name", "PC name", "Login @"};
 
+    /**
+     * All the data.
+     */
     private ArrayList<Object[]> data = new ArrayList<>();
 
+    /**
+     * @return all the stored data.
+     */
     public ArrayList<Object[]> getData() {
         return data;
     }
 
+    /**
+     * Adds a row.
+     *
+     * @param newData the new stuff to add: {@code {"Name", "PC name", "Login @"}}.
+     */
     public void addData(Object[] newData) {
         data.add(newData);
         fireTableDataChanged();
     }
 
+    /**
+     * Returns the number of columns in the model. A
+     * <code>JTable</code> uses this method to determine how many columns it
+     * should create and display by default.
+     *
+     * @return the number of columns in the model
+     * @see #getRowCount
+     */
     public int getColumnCount() {
-        return columnNames.length;
+        return COLUMN_NAMES.length;
     }
 
+    /**
+     * Returns the number of rows in the model. A
+     * <code>JTable</code> uses this method to determine how many rows it
+     * should display.  This method should be quick, as it
+     * is called frequently during rendering.
+     *
+     * @return the number of rows in the model
+     * @see #getColumnCount
+     */
     public int getRowCount() {
         return data.size();
     }
 
-    public String getColumnName(int col) {
-        return columnNames[col];
+    /**
+     * Returns the name of the required column.
+     *
+     * @param column the column being queried
+     * @return a string containing the name of {@code column}.
+     */
+    public String getColumnName(int column) {
+        return COLUMN_NAMES[column];
     }
 
-    public Object getValueAt(int row, int col) {
-        return data.get(row)[col];
+    /**
+     * Returns the value for the cell at {@code columnIndex} and {@code rowIndex}.
+     *
+     * @param rowIndex    the row whose value is to be queried.
+     * @param columnIndex the column whose value is to be queried.
+     * @return the value Object at the specified cell.
+     */
+    public Object getValueAt(int rowIndex, int columnIndex) {
+        return data.get(rowIndex)[columnIndex];
     }
 
-    public Class getColumnClass(int c) {
-        return getValueAt(0, c).getClass();
+    /**
+     * Returns {@code Object.class} regardless of {@code columnIndex}.
+     *
+     * @param columnIndex the column being queried
+     * @return the Object.class
+     */
+    public Class getColumnClass(int columnIndex) {
+        return getValueAt(0, columnIndex).getClass();
     }
 
-    public boolean isCellEditable(int row, int col) {
-        return false;
-    }
-
-    public void setValueAt(Object value, int row, int col) {
-        data.get(row)[col] = value;
-        fireTableCellUpdated(row, col);
+    /**
+     * Simple implementation to set a value.
+     *
+     * @param aValue      value to assign to cell
+     * @param rowIndex    row of cell
+     * @param columnIndex column of cell
+     */
+    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+        data.get(rowIndex)[columnIndex] = aValue;
+        fireTableCellUpdated(rowIndex, columnIndex);
     }
 }

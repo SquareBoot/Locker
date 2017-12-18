@@ -92,13 +92,15 @@ public class LockScreenRunner implements Runnable {
         }
     }
 
-    // TODO(marco): add JavaDoc
+    /**
+     * Releases some keys.
+     */
     private void releaseKeys(Robot robot) {
         robot.keyRelease(KeyEvent.VK_CONTROL);
         robot.keyRelease(KeyEvent.VK_ALT);
         robot.keyRelease(KeyEvent.VK_DELETE);
         robot.keyRelease(KeyEvent.VK_WINDOWS);
-        robot.keyRelease(9); //TODO(marco): ?
+        robot.keyRelease(9);
     }
 
     /**
