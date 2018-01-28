@@ -1,4 +1,4 @@
-package locker.server;
+package squareboot.locker.server;
 
 import javax.swing.*;
 import java.awt.event.ActionListener;
@@ -6,7 +6,7 @@ import java.awt.event.ActionListener;
 /**
  * The admin GUI.
  *
- * @author Marco Cipriani
+ * @author SquareBoot
  * @version 0.1
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
@@ -16,7 +16,13 @@ public class AdminGUI extends JFrame {
      * The parent component.
      */
     private JPanel parent;
+    /**
+     * The list of active users.
+     */
     private JTable table;
+    /**
+     * A button to save the table.
+     */
     private JButton save;
 
     /**

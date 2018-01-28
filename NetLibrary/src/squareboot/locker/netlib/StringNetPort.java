@@ -1,4 +1,4 @@
-package locker.netlib;
+package squareboot.locker.netlib;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -6,7 +6,7 @@ import java.io.IOException;
 /**
  * Implementation of the {@link NetPort} class to send and receive strings.
  *
- * @author Marco Cipriani
+ * @author SquareBoot
  * @version 0.1
  * @see NetPort
  * @see Server

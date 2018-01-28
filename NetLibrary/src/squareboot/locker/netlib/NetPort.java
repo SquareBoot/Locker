@@ -1,4 +1,4 @@
-package locker.netlib;
+package squareboot.locker.netlib;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,7 +7,7 @@ import java.io.IOException;
  * Network client or server base class.
  *
  * @param <MessageType> the message type.
- * @author Marco Cipriani
+ * @author SquareBoot
  * @see StringNetPort
  */
 @SuppressWarnings({"unused", "unchecked", "WeakerAccess"})
@@ -148,7 +148,7 @@ public abstract class NetPort<MessageType> {
     /**
      * Different ways to start the connection.
      *
-     * @author Marco Cipriani
+     * @author SquareBoot
      * @version 0.1
      */
     public enum Mode {

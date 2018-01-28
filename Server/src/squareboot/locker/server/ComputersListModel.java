@@ -1,10 +1,10 @@
-package locker.server;
+package squareboot.locker.server;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 
 /**
- * @author Marco Cipriani
+ * @author SquareBoot
  * @version 0.1
  */
 @SuppressWarnings({"unused", "WeakerAccess"})

@@ -1,4 +1,4 @@
-package locker.client;
+package squareboot.locker.client;
 
 import java.awt.*;
 import java.io.IOException;
@@ -6,7 +6,7 @@ import java.io.IOException;
 /**
  * OS-specific tools, like bash commands invocation, Windows programs killing, etc...
  *
- * @author Marco Cipriani
+ * @author SquareBoot
  * @version 0.1
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
@@ -89,7 +89,7 @@ public final class OSTools {
      */
     public static void execWin(String cmd) {
         try {
-            Runtime.getRuntime().exec("taskkill /F /IM " + cmd).waitFor();
+            Runtime.getRuntime().exec(cmd).waitFor();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -108,7 +108,7 @@ public final class OSTools {
     /**
      * This enum contains all the known operating systems.
      *
-     * @author Marco Cipriani
+     * @author SquareBoot
      * @version 0.1
      */
     public enum OSFamilies {

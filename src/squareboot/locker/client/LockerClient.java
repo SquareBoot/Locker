@@ -1,6 +1,6 @@
-package locker.client;
+package squareboot.locker.client;
 
-import locker.netlib.Client;
+import squareboot.locker.netlib.Client;
 
 import java.awt.*;
 import java.net.InetAddress;
@@ -11,7 +11,7 @@ import java.util.Date;
 /**
  * The locker client starter.
  *
- * @author Marco Cipriani
+ * @author SquareBoot
  * @version 0.1
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
@@ -45,7 +45,7 @@ public class LockerClient {
                 client.send(name + "-" +
                         System.getProperty("user.name").replace("-", "_") + "@" +
                         InetAddress.getLocalHost().getHostName().replace("-", "_") + "-" +
-                        new SimpleDateFormat("HH:mm").format(new Date()));
+                        new SimpleDateFormat("MM/dd/yyyy HH:mm").format(new Date()));
                 lsr.stop();
                 System.out.println("Done.\nGood bye.");
                 System.exit(0);
@@ -61,10 +61,10 @@ public class LockerClient {
      * Main.
      */
     public static void main(String[] args) {
-        //OSTools.OSFamilies f = OSTools.getOSFamily();
-        //if (f != OSTools.OSFamilies.WINDOWS) {
-        //    throw new UnsupportedOperationException("Unsupported OS!");
-        //}
-        new LockerClient("127.0.0.1", 1234);
+        OSTools.OSFamilies f = OSTools.getOSFamily();
+        if (f != OSTools.OSFamilies.WINDOWS) {
+            throw new UnsupportedOperationException("Unsupported OS!");
+        }
+        new LockerClient(args[0], Integer.valueOf(args[1]));
     }
 }

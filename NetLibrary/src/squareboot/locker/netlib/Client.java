@@ -1,4 +1,4 @@
-package locker.netlib;
+package squareboot.locker.netlib;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -9,7 +9,7 @@ import java.net.Socket;
 /**
  * Client Socket for a local LAN Server Socket with event handling.
  *
- * @author Marco Cipriani
+ * @author SquareBoot
  * @version 0.1
  */
 @SuppressWarnings({"unused", "unchecked", "WeakerAccess"})

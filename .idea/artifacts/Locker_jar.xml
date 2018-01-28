@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Locker:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/Locker_jar</output-path>
+    <root id="archive" name="Locker.jar">
+      <element id="module-output" name="Locker" />
+      <element id="module-output" name="NetLibrary" />
+    </root>
+  </artifact>
+</component>

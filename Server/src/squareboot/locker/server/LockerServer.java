@@ -1,15 +1,16 @@
-package locker.server;
+package squareboot.locker.server;
 
-import locker.netlib.Server;
+import squareboot.locker.netlib.Server;
 
 import javax.swing.*;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
 
 /**
- * @author Marco Cipriani
+ * @author SquareBoot
  * @version 0.1
  */
 @SuppressWarnings("unused")
@@ -19,6 +20,10 @@ public class LockerServer {
      * The list of computers, in a table model.
      */
     private ComputersListModel model = new ComputersListModel();
+    /**
+     * Where to save.
+     */
+    private File logFile;
 
     /**
      * Class constructor.
@@ -47,21 +52,46 @@ public class LockerServer {
         adminGUI.addSaveLister(event -> {
             try {
                 System.out.println("Exporting data...");
-                JFileChooser fileChooser = new JFileChooser();
-                fileChooser.setDialogTitle("Export list");
-                if (fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
-                    PrintWriter pw = new PrintWriter(new FileWriter(fileChooser.getSelectedFile()));
-                    for (Object[] o : model.getData()) {
-                        pw.write(Arrays.toString(o));
+                if (logFile == null) {
+                    JFileChooser fileChooser = new JFileChooser();
+                    fileChooser.setDialogTitle("Export list");
+                    if (fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+                        logFile = fileChooser.getSelectedFile();
+
+                    } else {
+                        System.out.println("Aborted.");
+                        return;
                     }
-                    pw.close();
                 }
+                PrintWriter pw = new PrintWriter(new FileWriter(logFile));
+                for (Object[] o : model.getData()) {
+                    pw.write(Arrays.toString(o));
+                }
+                pw.close();
                 System.out.println("Done.");
 
             } catch (IOException e) {
                 e.printStackTrace();
             }
         });
+        System.out.println("Asking for a log file...");
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Export list");
+        if (fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+            logFile = fileChooser.getSelectedFile();
+            new Thread(() -> {
+                try {
+                    PrintWriter pw = new PrintWriter(new FileWriter(logFile));
+                    for (Object[] o : model.getData()) {
+                        pw.write(Arrays.toString(o));
+                    }
+                    pw.close();
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }, "Auto saving").run();
+        }
         System.out.println("Done.\nWaing for a connection...");
         server.connect();
     }
@@ -70,6 +100,6 @@ public class LockerServer {
      * Main.
      */
     public static void main(String[] args) {
-        new LockerServer(1234);
+        new LockerServer(Integer.valueOf(args[0]));
     }
 }

@@ -1,14 +1,16 @@
-package locker.client;
+package squareboot.locker.client;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 
 /**
  * Shows a window and makes it behave as a lock screen.
  *
  * @author Martijn Courteaux
- * @author Marco Cipriani
+ * @author SquareBoot
  * @version 0.1
  * @see <a href="https://stackoverflow.com/a/6744937">Use Java to lock a screen</a>
  */
@@ -76,16 +78,30 @@ public class LockScreenRunner implements Runnable {
                 releaseKeys(robot);
                 sleep(15L);
                 focus();
-                //if (i++ % 10 == 0) {
-                //    kill("taskmgr.exe");
-                //}
-                OSTools.killWin("taskmgr.exe");
+                if (i++ % 10 == 0) {
+                    OSTools.killWin("taskmgr.exe");
+                }
+                //OSTools.killWin("taskmgr.exe");
                 focus();
                 releaseKeys(robot);
             }
 
-            // Restart explorer
-            OSTools.execWin("explorer.exe");
+            // Restart explorer (or try to - it sometimes doesn't)
+            StringBuilder pidInfo = new StringBuilder();
+            do {
+                OSTools.execWin("explorer.exe");
+                sleep(1000);
+                String line;
+                BufferedReader input = new BufferedReader(
+                        new InputStreamReader(
+                                Runtime.getRuntime().exec(
+                                        System.getenv("windir") + "\\system32\\" + "tasklist.exe").getInputStream()));
+                while ((line = input.readLine()) != null) {
+                    pidInfo.append(line);
+                }
+                input.close();
+
+            } while (!pidInfo.toString().contains("explorer.exe"));
 
         } catch (Exception e) {
             e.printStackTrace();

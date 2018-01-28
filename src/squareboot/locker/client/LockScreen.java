@@ -1,14 +1,15 @@
-package locker.client;
+package squareboot.locker.client;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 
 /**
  * The GUI of the lock screen.<br>
  * <b>Note: this window doesn't lock the screen, show a message to the user or whatever you expect.
  * Run it in a {@link LockScreenRunner} object to do that.</b>
  *
- * @author Marco Cipriani
+ * @author SquareBoot
  * @version 0.1
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
@@ -22,7 +23,13 @@ public class LockScreen extends JFrame {
      * The parent component.
      */
     private JPanel parent;
+    /**
+     * User name text field.
+     */
     private JTextField nameField;
+    /**
+     * The "continue" button.
+     */
     private JButton continueButton;
 
     /**
@@ -33,14 +40,10 @@ public class LockScreen extends JFrame {
     public LockScreen(GraphicsDevice gp) {
         super("Locker", gp.getDefaultConfiguration());
         setContentPane(parent);
-        continueButton.addActionListener(e -> {
-            String name = nameField.getText();
-            if (!name.equals("")) {
-                closeLocker.run(name);
-            }
-        });
+        ActionListener al = new ActionListener();
+        continueButton.addActionListener(al);
+        nameField.addActionListener(al);
     }
-
 
     /**
      * @param r the stuff to execute to unlock the window.
@@ -52,7 +55,7 @@ public class LockScreen extends JFrame {
     /**
      * Implement its method to close the window and save the name the user wrote.
      *
-     * @author Marco Cipriani
+     * @author SquareBoot
      * @version 0.1
      */
     public interface ContinueRunnable {
@@ -61,5 +64,23 @@ public class LockScreen extends JFrame {
          * Implement this method to close the window and save the name the user wrote.
          */
         void run(String name);
+    }
+
+    /**
+     * @author SquareBoot
+     * @version 0.1
+     */
+    private class ActionListener implements java.awt.event.ActionListener {
+
+        /**
+         * Invoked when an action occurs.
+         */
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            String name = nameField.getText();
+            if (!name.equals("")) {
+                closeLocker.run(name);
+            }
+        }
     }
 }
