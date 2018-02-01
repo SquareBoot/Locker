@@ -6,7 +6,7 @@
       <xy x="20" y="20" width="500" height="400"/>
     </constraints>
     <properties/>
-    <border type="none" title="Locker Admin GUI" title-position="2">
+    <border type="none" title="Locker - administrator" title-position="2">
       <font size="24" style="1"/>
     </border>
     <children>
@@ -23,15 +23,6 @@
           </component>
         </children>
       </scrollpane>
-      <component id="64436" class="javax.swing.JButton" binding="save">
-        <constraints>
-          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <icon value="res/save.png"/>
-          <text value=""/>
-        </properties>
-      </component>
       <hspacer id="ffbef">
         <constraints>
           <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
@@ -51,6 +42,15 @@
         </constraints>
         <properties>
           <text value="Copyright (c) 2018 SquareBoot (Marco Cipriani)"/>
+        </properties>
+      </component>
+      <component id="64436" class="javax.swing.JButton" binding="save">
+        <constraints>
+          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <icon value="res/save.png"/>
+          <text value=""/>
         </properties>
       </component>
     </children>

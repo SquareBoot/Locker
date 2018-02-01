@@ -3,16 +3,12 @@ package squareboot.locker.client;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 
 /**
  * Shows a window and makes it behave as a lock screen.
  *
- * @author Martijn Courteaux
  * @author SquareBoot
  * @version 0.1
- * @see <a href="https://stackoverflow.com/a/6744937">Use Java to lock a screen</a>
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class LockScreenRunner implements Runnable {
@@ -20,18 +16,21 @@ public class LockScreenRunner implements Runnable {
     /**
      * The frame.
      */
-    private JFrame frame;
+    protected JFrame frame;
     /**
      * The graphics device of the frame.
      */
-    private GraphicsDevice gp;
+    protected GraphicsDevice gp;
     /**
      * Change it to {@code false} to stop the program.
      */
-    private boolean running;
+    protected boolean running;
 
     /**
-     * Class constructor. Runs the window.
+     * Class constructor. Shows the window and locks the screen.
+     *
+     * @param frame the {@code JFrame} to use as lock screen.
+     * @param gp    the display to use.
      */
     public LockScreenRunner(JFrame frame, GraphicsDevice gp) {
         this.frame = frame;
@@ -49,7 +48,7 @@ public class LockScreenRunner implements Runnable {
     }
 
     /**
-     * Shows the window and kills {@code explorer.exe}.
+     * Shows the window.
      */
     public void run() {
         try {
@@ -67,9 +66,6 @@ public class LockScreenRunner implements Runnable {
                 frame.setVisible(true);
             }
 
-            // Kill explorer
-            OSTools.killWin("explorer.exe");
-
             Robot robot = new Robot();
             int i = 0;
             while (running) {
@@ -78,30 +74,8 @@ public class LockScreenRunner implements Runnable {
                 releaseKeys(robot);
                 sleep(15L);
                 focus();
-                if (i++ % 10 == 0) {
-                    OSTools.killWin("taskmgr.exe");
-                }
-                //OSTools.killWin("taskmgr.exe");
-                focus();
                 releaseKeys(robot);
             }
-
-            // Restart explorer (or try to - it sometimes doesn't)
-            StringBuilder pidInfo = new StringBuilder();
-            do {
-                OSTools.execWin("explorer.exe");
-                sleep(1000);
-                String line;
-                BufferedReader input = new BufferedReader(
-                        new InputStreamReader(
-                                Runtime.getRuntime().exec(
-                                        System.getenv("windir") + "\\system32\\" + "tasklist.exe").getInputStream()));
-                while ((line = input.readLine()) != null) {
-                    pidInfo.append(line);
-                }
-                input.close();
-
-            } while (!pidInfo.toString().contains("explorer.exe"));
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -111,7 +85,7 @@ public class LockScreenRunner implements Runnable {
     /**
      * Releases some keys.
      */
-    private void releaseKeys(Robot robot) {
+    protected void releaseKeys(Robot robot) {
         robot.keyRelease(KeyEvent.VK_CONTROL);
         robot.keyRelease(KeyEvent.VK_ALT);
         robot.keyRelease(KeyEvent.VK_DELETE);
@@ -125,7 +99,7 @@ public class LockScreenRunner implements Runnable {
      *
      * @param millis the number of milliseconds.
      */
-    private void sleep(long millis) {
+    protected void sleep(long millis) {
         try {
             Thread.sleep(millis);
 
@@ -137,8 +111,7 @@ public class LockScreenRunner implements Runnable {
     /**
      * Grabs the focus.
      */
-    private void focus() {
+    protected void focus() {
         frame.toFront();
-        //frame.requestFocus();
     }
 }

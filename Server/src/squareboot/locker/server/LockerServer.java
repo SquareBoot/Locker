@@ -31,6 +31,16 @@ public class LockerServer {
      * @param port the port of the server.
      */
     public LockerServer(int port) {
+        this(port, null);
+    }
+
+    /**
+     * Class constructor.
+     *
+     * @param port    the port of the server.
+     * @param outFile where to save the list of clients.
+     */
+    public LockerServer(int port, String outFile) {
         System.out.println("Welcome\nSetting up Locker (server)...");
         AdminGUI adminGUI = new AdminGUI(model);
         Server server = new Server(port) {
@@ -42,10 +52,16 @@ public class LockerServer {
                     model.addData(new Object[]{
                             stuff[0], stuff[1], stuff[2],
                     });
+                    if (logFile != null) {
+                        save();
+                    }
 
                 } catch (ArrayIndexOutOfBoundsException e) {
                     System.err.println("Wrong message from client: " + msg);
                     System.err.println("Could not parse it!");
+
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
         };
@@ -63,36 +79,26 @@ public class LockerServer {
                         return;
                     }
                 }
-                PrintWriter pw = new PrintWriter(new FileWriter(logFile));
-                for (Object[] o : model.getData()) {
-                    pw.write(Arrays.toString(o));
-                }
-                pw.close();
-                System.out.println("Done.");
+                save();
 
             } catch (IOException e) {
                 e.printStackTrace();
             }
         });
-        System.out.println("Asking for a log file...");
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Export list");
-        if (fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
-            logFile = fileChooser.getSelectedFile();
-            new Thread(() -> {
-                try {
-                    PrintWriter pw = new PrintWriter(new FileWriter(logFile));
-                    for (Object[] o : model.getData()) {
-                        pw.write(Arrays.toString(o));
-                    }
-                    pw.close();
+        if (outFile == null) {
+            System.out.println("Asking for a log file...");
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("Export list");
+            if (fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+                logFile = fileChooser.getSelectedFile();
+                System.out.println("Autosave enabled.");
+            }
 
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }, "Auto saving").run();
+        } else {
+            logFile = new File(outFile);
+            System.out.println("Autosave enabled.");
         }
-        System.out.println("Done.\nWaing for a connection...");
+        System.out.println("Waiting for clients...");
         server.connect();
     }
 
@@ -100,6 +106,37 @@ public class LockerServer {
      * Main.
      */
     public static void main(String[] args) {
-        new LockerServer(Integer.valueOf(args[0]));
+        try {
+            for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (args.length == 1) {
+            new LockerServer(Integer.parseInt(args[0]));
+
+        } else if (args.length == 2) {
+            new LockerServer(Integer.parseInt(args[0]), args[1]);
+
+        } else {
+            System.err.println("Invalid arguments!");
+        }
+    }
+
+    /**
+     * Saves the list of clients on the disk.
+     */
+    private void save() throws IOException {
+        PrintWriter pw = new PrintWriter(new FileWriter(logFile));
+        for (Object[] o : model.getData()) {
+            pw.write(Arrays.toString(o).replace("[", "").replace("]", ""));
+        }
+        pw.close();
+        System.out.println("Done.");
     }
 }

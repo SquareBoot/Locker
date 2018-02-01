@@ -2,6 +2,7 @@ package squareboot.locker.client;
 
 import squareboot.locker.netlib.Client;
 
+import javax.swing.*;
 import java.awt.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -9,7 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * The locker client starter.
+ * The Locker Client main class.
  *
  * @author SquareBoot
  * @version 0.1
@@ -31,14 +32,22 @@ public class LockerClient {
 
             }
         };
+
         System.out.println("Connecting to the server...");
-        client.connect();
+        if (!client.connect()) {
+            System.err.println("An error occurred while connecting!");
+            System.out.println("Good bye.");
+            System.exit(0);
+        }
+
         System.out.println("Done.\nSetting up the GUI...");
         GraphicsDevice[] devices = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
         // Only one graphics device supported!
         GraphicsDevice gp = (devices[0]);
         LockScreen ls = new LockScreen(gp);
-        LockScreenRunner lsr = new LockScreenRunner(ls, gp);
+        LockScreenRunner lsr = (OSTools.getOSFamily() == OSTools.OSFamilies.WINDOWS) ?
+                new WinLockScreenRunner(ls, gp) : new LockScreenRunner(ls, gp);
+
         ls.setContinueAction(name -> {
             try {
                 System.out.println("Printing info...");
@@ -61,10 +70,45 @@ public class LockerClient {
      * Main.
      */
     public static void main(String[] args) {
-        OSTools.OSFamilies f = OSTools.getOSFamily();
-        if (f != OSTools.OSFamilies.WINDOWS) {
-            throw new UnsupportedOperationException("Unsupported OS!");
+        try {
+            for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        new LockerClient(args[0], Integer.valueOf(args[1]));
+
+        if (OSTools.getOSFamily() == OSTools.OSFamilies.WINDOWS) {
+            System.out.println("Windows detected! Locker will kill explorer.exe for a better result.");
+        }
+
+        if (args.length == 2) {
+            try {
+                new LockerClient(args[0], Integer.valueOf(args[1]));
+
+            } catch (NumberFormatException e) {
+                System.err.println("Invalid port!");
+            }
+
+        } else if (args.length == 1) {
+            String[] sa = args[0].split(":");
+            if (sa.length == 2) {
+                try {
+                    new LockerClient(sa[0], Integer.valueOf(sa[1]));
+
+                } catch (NumberFormatException e) {
+                    System.err.println("Invalid port!");
+                }
+
+            } else {
+                System.err.println("Could not parse arguments!");
+            }
+
+        } else {
+            System.err.println("Invalid arguments!");
+        }
     }
 }

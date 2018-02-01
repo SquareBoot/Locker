@@ -62,7 +62,6 @@ public abstract class NetPort<MessageType> {
                 connected = true;
 
             } catch (Exception e) {
-                System.err.println("An error occurred while connecting...");
                 e.printStackTrace();
             }
         };
